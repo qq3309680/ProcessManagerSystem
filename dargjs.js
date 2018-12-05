@@ -141,6 +141,7 @@ CDrag.Table.Rows.prototype = {
         wc.window = window;
         wc.element = wc.element_init();
         temp = wc.element.childNodes[CDrag.IE ? 0 : 1];
+
         wc.title = temp.childNodes[0];
         wc.reduce = temp.childNodes[1];
         wc.close = temp.childNodes[2];
@@ -168,6 +169,7 @@ CDrag.Table.Rows.prototype = {
         //console.dir(wc);
         wc.title.innerHTML = info.branch + "_" + info.column + "_" + info.row;
         wc.content.innerHTML = info.content;
+        wc.element.setAttribute("row", info.row);
         if (wc.window == 0) {
             wc.content.style.display = "none";
             wc.reduce.innerHTML = "放大";
@@ -175,6 +177,8 @@ CDrag.Table.Rows.prototype = {
             wc.content.style.display = "block";
             wc.reduce.innerHTML = "缩小";
         }
+
+
         wc.content.style.display = (wc.window == 0 ? "none" : "block");
     }
 
@@ -300,10 +304,10 @@ CDrag.prototype = {
 
                     var emptydivrow = temp.div.getAttribute("row");
 
-                    var changenoderow = temp_div.children[0].children[0].innerHTML.split("_")[2];
+                    var changenoderow = temp_div.getAttribute("row");
 
                     temp_div.children[0].children[0].innerHTML = temp_div.children[0].children[0].innerHTML.split("_")[0] + "_" + temp_div.children[0].children[0].innerHTML.split("_")[1] + "_" + emptydivrow;
-
+                    temp_div.setAttribute("row", emptydivrow);
                     temp_div.parentNode.replaceChild(temp_div, temp.div);
 
                     if (emptydivrow < changenoderow) {
@@ -343,68 +347,6 @@ CDrag.prototype = {
         }
 
 
-
-
-
-        //    if (t_position.x < mouse.x && (t_position.x + t_cols.element.offsetWidth) > mouse.x) {
-        //        if (t_cols.items.length > 0) { //如果此列行数大于0
-        //            if (wc.rePosition(t_cols.items[0].element).y + 20 > mouse.y) {
-        //                //如果鼠标位置大于第一行的位置即是最上。。
-        //                //向上
-        //                obj.on.a = t_cols.items[0];
-        //                obj.on.b = "up";
-        //                obj.on.a.element.parentNode.insertBefore(temp.div, obj.on.a.element);
-
-        //            } else if (t_cols.items.length > 1 && t_cols.items[0] == row &&
-        //             wc.rePosition(t_cols.items[1].element).y + 20 > mouse.y) {
-        //                //如果第一行是拖拽对象而第鼠标大于第二行位置则，没有动。。
-        //                //向上
-        //                obj.on.b = "me";
-        //                t_cols.items[1].element.parentNode.insertBefore(temp.div, t_cols.items[1].element);
-        //            } else {
-
-
-        //                for (j = t_cols.items.length - 1 ; j > -1 ; j--) {
-        //                    //重最下行向上查询
-        //                    t_rows = t_cols.items[j];
-        //                    if (t_rows == obj.row) {
-        //                        if (t_cols.items.length == 1) {
-        //                            t_cols.element.appendChild(temp.div);
-        //                            obj.on.b = "me";
-        //                        }
-        //                        continue;
-        //                    }
-        //                    if (wc.rePosition(t_rows.element).y < mouse.y) {
-        //                        //如果鼠标大于这行则在这行下面
-        //                        if (t_rows.id + 1 < t_cols.items.length && t_cols.items[t_rows.id + 1] != obj.row) {
-        //                            //如果这行有下一行则重这行下一行的上面插入
-        //                            t_cols.items[t_rows.id + 1].element.parentNode.
-        //                             insertBefore(temp.div, t_cols.items[t_rows.id + 1].element);
-        //                            obj.on.a = t_rows;
-        //                            obj.on.b = "down";
-        //                        } else if (t_rows.id + 2 < t_cols.items.length) {
-        //                            //如果这行下一行是拖拽对象则插入到下两行，即拖拽对象返回原位
-        //                            t_cols.items[t_rows.id + 2].element.parentNode.
-        //                             insertBefore(temp.div, t_cols.items[t_rows.id + 2].element);
-        //                            obj.on.b = "me";
-        //                        } else {
-        //                            //前面都没有满足则放在最低行
-        //                            t_rows.element.parentNode.appendChild(temp.div);
-        //                            obj.on.a = t_rows;
-        //                            obj.on.b = "down";
-        //                        }
-        //                        return;
-        //                    }
-        //                }
-        //            }
-        //        } else {
-        //            //此列无内容添加新行
-        //            t_cols.element.appendChild(temp.div);
-        //            obj.on.a = t_cols;
-        //            obj.on.b = "new";
-        //        }
-        //    }
-        //}
     },
 
     eMove: function () {
@@ -423,6 +365,8 @@ CDrag.prototype = {
         }
 
         var emptydivrow = temp.div.getAttribute("row");
+
+        div.setAttribute("row", emptydivrow);
 
         div.children[0].children[0].innerHTML = div.children[0].children[0].innerHTML.split("_")[0] + "_" + div.children[0].children[0].innerHTML.split("_")[1] + "_" + emptydivrow;
 
@@ -446,6 +390,7 @@ CDrag.prototype = {
     },
 
     close: function (o) {
+
         //删除对象
         var wc = this, parent = o.parent;
 
@@ -454,8 +399,33 @@ CDrag.prototype = {
         Object.delEvent(o.title, ["onmousedown"], o.mousedown);
         o.closeFunc = o.reduceFunc = o.mousedown = null;
 
+        var row = o.element.getAttribute("row");
+
+        for (var i = 0; i < o.parent.items.length; i++) {
+
+            if (row == o.parent.items.length) {
+                //最后一个节点
+
+            } else {
+
+                var otherRow = o.parent.items[i].element;
+
+                if (row < otherRow.getAttribute("row")) {
+                    console.dir(otherRow.getAttribute("row"));
+
+                    o.parent.items[i].element.setAttribute("row", otherRow.getAttribute("row") - 1);
+                    otherRow.children[0].children[0].innerHTML = otherRow.children[0].children[0].innerHTML.split("_")[0] + "_" + otherRow.children[0].children[0].innerHTML.split("_")[1] + "_" + parseInt(otherRow.getAttribute("row"));
+                }
+
+            }
+
+
+        }
+
         parent.element.removeChild(o.element);
+
         parent.del(o.id);
+
         delete o;
     },
 
@@ -498,7 +468,7 @@ CDrag.prototype = {
 
         var id = wc.returnMaxId(div.id);
         var branch = div.id.split("_")[0];
-        var column = div.id.split("_")[1];
+        var column = parseInt(div.id.split("_")[1]) + 1;
         var type;
 
         //获取类型
@@ -718,3 +688,4 @@ var database = {
         }
     }
 };
+
